@@ -108,7 +108,7 @@ export const CalendarFilters: React.FC<Props> = ({
 
             <div className="pt-4 mt-4 border-t border-slate-100">
                 <button
-                    onClick={onClose}
+                    onClick={() => onClose?.()}
                     className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-700 transition-colors"
                 >
                     Aplicar Filtros

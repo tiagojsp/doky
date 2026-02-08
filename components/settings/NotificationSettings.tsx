@@ -50,23 +50,30 @@ export const NotificationSettings: React.FC = () => {
         if (!settings) return;
         setSaving(true);
 
-        const updatedSettings = {
-            ...settings,
-            notifications: {
-                enabled,
-                message,
-                channels: { smart: sendSmart, sms: sendSMS, email: sendEmail },
-                timing: { reminder: parseInt(reminderTiming), sameDay: sameDayTiming },
-                confirmationType,
-                resendSmsIfNeeded: resendSMS
-            }
-        };
+        try {
+            const updatedSettings = {
+                ...settings,
+                notifications: {
+                    enabled,
+                    message,
+                    channels: { smart: sendSmart, sms: sendSMS, email: sendEmail },
+                    timing: { reminder: parseInt(reminderTiming), sameDay: sameDayTiming },
+                    confirmationType,
+                    resendSmsIfNeeded: resendSMS
+                }
+            };
 
-        const success = await api.updateEstablishmentSettings(updatedSettings);
-        if (success) {
-            setSettings(updatedSettings);
+            const success = await api.updateEstablishmentSettings(updatedSettings);
+            if (success) {
+                setSettings(updatedSettings);
+            } else {
+                console.error('Failed to save notification settings');
+            }
+        } catch (error) {
+            console.error('Error saving notification settings:', error);
+        } finally {
+            setSaving(false);
         }
-        setSaving(false);
     };
 
     if (loading) return <div className="p-8 text-center text-slate-400">A carregar definições...</div>;

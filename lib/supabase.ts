@@ -15,8 +15,12 @@ const isValidUrl = (url: string) => {
 const finalUrl = isValidUrl(supabaseUrl) ? supabaseUrl : 'https://placeholder.supabase.co';
 const finalKey = supabaseAnonKey || 'placeholder-key';
 
-if (!isValidUrl(supabaseUrl)) {
-  console.warn('Supabase URL is invalid or missing. Check .env.local');
+if (!isValidUrl(supabaseUrl) || !supabaseAnonKey) {
+  console.error(
+    '%c[DOKY] Supabase não configurado!',
+    'color: red; font-weight: bold',
+    '\nConfigure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ficheiro .env.local'
+  );
 }
 
 export const supabase = createClient(finalUrl, finalKey);

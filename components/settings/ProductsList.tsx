@@ -42,6 +42,7 @@ export const ProductsList: React.FC<Props> = ({ onChange }) => {
     };
 
     const handleUpdate = async (id: string, field: keyof Product, value: any) => {
+        const originalProducts = [...products];
         const updatedProducts = products.map(p =>
             p.id === id ? { ...p, [field]: value } : p
         );
@@ -49,8 +50,18 @@ export const ProductsList: React.FC<Props> = ({ onChange }) => {
 
         const productToUpdate = updatedProducts.find(p => p.id === id);
         if (productToUpdate) {
-            await api.updateProduct(productToUpdate);
-            if (onChange) onChange();
+            try {
+                const success = await api.updateProduct(productToUpdate);
+                if (!success) {
+                    setProducts(originalProducts);
+                    console.error('Failed to update product');
+                } else {
+                    if (onChange) onChange();
+                }
+            } catch (error) {
+                setProducts(originalProducts);
+                console.error('Error updating product:', error);
+            }
         }
     };
 

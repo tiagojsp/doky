@@ -16,7 +16,7 @@ export const WizardStepper: React.FC<Props> = ({ currentStep, steps }) => {
                 {/* Active Progress Bar Gradient */}
                 <div
                     className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-doky-action-cyan to-doky-bright-cyan rounded-full -z-10 transition-all duration-700 ease-in-out glow-primary shadow-[0_0_20px_rgba(0,194,224,0.4)]"
-                    style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+                    style={{ width: `${steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0}%` }}
                 ></div>
 
                 {steps.map((step, index) => {

@@ -9,27 +9,23 @@ export const useIdleTimer = (timeoutMs: number, onTimeout: () => void) => {
         onTimeoutRef.current = onTimeout;
     }, [onTimeout]);
 
-    const resetTimer = () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-        setIsIdle(false);
-
-        timerRef.current = setTimeout(() => {
-            setIsIdle(true);
-            onTimeoutRef.current();
-        }, timeoutMs);
-    };
-
     useEffect(() => {
         const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
 
         const handleActivity = () => {
-            resetTimer();
+            if (timerRef.current) clearTimeout(timerRef.current);
+            setIsIdle(false);
+
+            timerRef.current = setTimeout(() => {
+                setIsIdle(true);
+                onTimeoutRef.current();
+            }, timeoutMs);
         };
 
         events.forEach(event => window.addEventListener(event, handleActivity));
 
         // Initial start
-        resetTimer();
+        handleActivity();
 
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);

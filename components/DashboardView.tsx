@@ -28,8 +28,13 @@ export const DashboardView: React.FC<Props> = ({ appointments, services }) => {
   appointments.forEach(app => {
     serviceCounts[app.serviceId] = (serviceCounts[app.serviceId] || 0) + 1;
   });
-  const topServiceId = Object.keys(serviceCounts).reduce((a, b) => serviceCounts[a] > serviceCounts[b] ? a : b, services[0].id);
-  const topService = services.find(s => s.id === topServiceId);
+
+  let topService: Service | undefined;
+  if (services.length > 0 && Object.keys(serviceCounts).length > 0) {
+    const topServiceId = Object.keys(serviceCounts).reduce((a, b) =>
+      serviceCounts[a] > serviceCounts[b] ? a : b, Object.keys(serviceCounts)[0]);
+    topService = services.find(s => s.id === topServiceId);
+  }
 
   return (
     <div className="h-full overflow-auto p-4 md:p-8 pb-24">
@@ -103,7 +108,7 @@ export const DashboardView: React.FC<Props> = ({ appointments, services }) => {
           </div>
           <div className="relative z-10">
              <p className="text-cyan-100 text-xs font-bold uppercase tracking-wider">Serviço Top</p>
-             <h3 className="text-xl font-black mt-1 leading-tight line-clamp-2">{topService?.name}</h3>
+             <h3 className="text-xl font-black mt-1 leading-tight line-clamp-2">{topService?.name || 'Sem dados'}</h3>
              <p className="text-xs text-cyan-100 font-medium mt-2 bg-white/20 inline-block px-2 py-1 rounded-lg">
                Responsável por 40% da receita
              </p>

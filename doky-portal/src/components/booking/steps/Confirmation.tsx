@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { Service, Staff } from "@/types";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { Loader2, Phone, User, CheckCircle } from "lucide-react";
+import { Loader2, Phone, User, CheckCircle, Mail } from "lucide-react";
 
 interface ConfirmationProps {
     service: Service;
@@ -166,6 +166,25 @@ export function Confirmation({ service, staff, date, time, onBack, onSuccess }: 
                     </div>
                     <p className="text-[10px] text-slate-400 mt-1 ml-1">
                         Usaremos este número para enviar a confirmação.
+                    </p>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">
+                        Email (Opcional)
+                    </label>
+                    <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            className="block w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 font-bold outline-none focus:border-[var(--color-doky-action-cyan)] focus:ring-4 focus:ring-cyan-500/10 placeholder:font-normal placeholder:text-slate-400"
+                            placeholder="email@exemplo.com"
+                        />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1 ml-1">
+                        Receberá a confirmação por email.
                     </p>
                 </div>
 

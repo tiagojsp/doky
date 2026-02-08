@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../../services/api';
 import { EstablishmentSettings } from '../../types';
 import { Smartphone, ExternalLink, Copy, Check, Share2, Globe, HelpCircle } from 'lucide-react';
@@ -28,23 +28,29 @@ export const ClientAppSettings: React.FC = () => {
         }
     };
 
-    const handleSave = async (newUrl: string) => {
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleSave = useCallback(async (newUrl: string) => {
         if (!settings) return;
 
-        try {
-            const newSettings = {
-                ...settings,
-                contacts: {
-                    ...settings.contacts,
-                    clientAppUrl: newUrl
-                }
-            };
-            setSettings(newSettings);
-            await api.updateEstablishmentSettings(newSettings);
-        } catch (error) {
-            console.error("Failed to save settings", error);
-        }
-    };
+        // Debounce: wait 500ms after last keystroke before saving
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(async () => {
+            try {
+                const newSettings = {
+                    ...settings,
+                    contacts: {
+                        ...settings.contacts,
+                        clientAppUrl: newUrl
+                    }
+                };
+                setSettings(newSettings);
+                await api.updateEstablishmentSettings(newSettings);
+            } catch (error) {
+                console.error("Failed to save settings", error);
+            }
+        }, 500);
+    }, [settings]);
 
     const copyToClipboard = () => {
         if (url) {

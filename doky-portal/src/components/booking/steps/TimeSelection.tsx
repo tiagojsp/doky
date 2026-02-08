@@ -80,15 +80,34 @@ export function TimeSelection({ service, staff, onSelect, onBack }: TimeSelectio
             // 3. Generate Slots
             const interval = 30; // minutes
             const slots: string[] = [];
-            let currentTime = parse(openTime, "HH:mm", selectedDate);
-            const endTime = parse(closeTime, "HH:mm", selectedDate);
+
+            const safeParse = (timeStr: string, refDate: Date): Date | null => {
+                try {
+                    const result = parse(timeStr, "HH:mm", refDate);
+                    return isNaN(result.getTime()) ? null : result;
+                } catch {
+                    console.warn('Invalid time format:', timeStr);
+                    return null;
+                }
+            };
+
+            const parsedOpen = safeParse(openTime, selectedDate);
+            const parsedClose = safeParse(closeTime, selectedDate);
+            if (!parsedOpen || !parsedClose) {
+                console.error('Invalid open/close times:', openTime, closeTime);
+                setAvailableSlots([]);
+                setLoading(false);
+                return;
+            }
+            let currentTime = parsedOpen;
+            const endTime = parsedClose;
 
             // Parse break times if they exist
             let breakStartTime: Date | null = null;
             let breakEndTime: Date | null = null;
             if (breakStart && breakEnd) {
-                breakStartTime = parse(breakStart, "HH:mm", selectedDate);
-                breakEndTime = parse(breakEnd, "HH:mm", selectedDate);
+                breakStartTime = safeParse(breakStart, selectedDate);
+                breakEndTime = safeParse(breakEnd, selectedDate);
             }
 
             while (isBefore(currentTime, endTime)) {
@@ -109,7 +128,8 @@ export function TimeSelection({ service, staff, onSelect, onBack }: TimeSelectio
 
                 // C. Check Appointment/Block Collision
                 const hasApptCollision = appointments?.some((app) => {
-                    const appStart = parse(app.start_time, "HH:mm", selectedDate);
+                    const appStart = safeParse(app.start_time, selectedDate);
+                    if (!appStart) return false;
                     const appEnd = addMinutes(appStart, app.duration || 30);
                     return isBefore(currentTime, appEnd) && isAfter(slotEnd, appStart);
                 });

@@ -42,14 +42,19 @@ export const EstablishmentForm: React.FC<Props> = ({ onSave }) => {
         }
     };
 
-    const handleChange = (section: keyof EstablishmentSettings, field: string, value: any) => {
+    const handleChange = (section: keyof EstablishmentSettings | null, field: string, value: any) => {
         if (!settings) return;
-        setSettings({
-            ...settings,
-            [section]: typeof settings[section] === 'object'
-                ? { ...settings[section] as object, [field]: value }
-                : value
-        });
+        if (section === null) {
+            // Top-level property (e.g., 'name')
+            setSettings({ ...settings, [field]: value });
+        } else {
+            setSettings({
+                ...settings,
+                [section]: typeof settings[section] === 'object'
+                    ? { ...settings[section] as object, [field]: value }
+                    : value
+            });
+        }
     };
 
     if (loading || !settings) return (

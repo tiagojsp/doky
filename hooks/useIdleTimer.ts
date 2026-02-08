@@ -10,15 +10,18 @@ export const useIdleTimer = (timeoutMs: number, onTimeout: () => void) => {
     }, [onTimeout]);
 
     useEffect(() => {
+        let mounted = true;
         const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
 
         const handleActivity = () => {
             if (timerRef.current) clearTimeout(timerRef.current);
-            setIsIdle(false);
+            if (mounted) setIsIdle(false);
 
             timerRef.current = setTimeout(() => {
-                setIsIdle(true);
-                onTimeoutRef.current();
+                if (mounted) {
+                    setIsIdle(true);
+                    onTimeoutRef.current();
+                }
             }, timeoutMs);
         };
 
@@ -28,6 +31,7 @@ export const useIdleTimer = (timeoutMs: number, onTimeout: () => void) => {
         handleActivity();
 
         return () => {
+            mounted = false;
             if (timerRef.current) clearTimeout(timerRef.current);
             events.forEach(event => window.removeEventListener(event, handleActivity));
         };

@@ -54,7 +54,7 @@ export const WizardStepDateTime: React.FC<Props> = ({ onSelect }) => {
                         <button
                             onClick={() => handleMonthChange(-1)}
                             className="p-2 rounded-full hover:bg-white hover:shadow-md transition-all text-slate-500"
-                            disabled={currentMonth <= new Date()}
+                            disabled={currentMonth.getFullYear() <= new Date().getFullYear() && currentMonth.getMonth() <= new Date().getMonth()}
                         >
                             <ChevronLeft size={20} />
                         </button>

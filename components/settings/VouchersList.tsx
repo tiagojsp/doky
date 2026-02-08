@@ -181,7 +181,8 @@ export const VouchersList: React.FC<VouchersListProps> = ({ onChange }) => {
                         <tbody className="divide-y divide-slate-100">
                             {vouchers.map((voucher) => {
                                 // Calculate "Value of Items" - simplified logic for demo
-                                const itemsValue = (voucher.price * (1 + (voucher.discountPercent || 0) / 100)).toFixed(2);
+                                const discountPct = voucher.discountPercent || 0;
+                                const itemsValue = discountPct >= 100 ? '0.00' : (voucher.price / (1 - discountPct / 100)).toFixed(2);
 
                                 return (
                                     <tr key={voucher.id} className="group hover:bg-blue-50/30 transition-colors">

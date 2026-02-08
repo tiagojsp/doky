@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f0f9ff;
+  --foreground: #171717;
+  
+  /* DOKY Brand Colors converted to CSS vars for Tailwind v4 */
+  --color-doky-blue: #003366;
+  --color-doky-action-cyan: #00C2E0;
+  --color-doky-bright: #00E5FF; /* bright-cyan */
+  --color-doky-success: #00E676; /* success-green */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-doky-blue: var(--color-doky-blue);
+  --color-doky-action-cyan: var(--color-doky-action-cyan);
+  --color-doky-bright: var(--color-doky-bright);
+  --color-doky-success: var(--color-doky-success);
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 border border-white/60 shadow-xl shadow-slate-200/50 rounded-[32px] backdrop-blur-xl;
+  }
+  
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-[--color-doky-blue] to-[--color-doky-action-cyan] text-white font-bold rounded-full px-8 py-4 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 uppercase tracking-wide text-xs;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  
+  /* Dynamic organic background matching main app */
+  background: radial-gradient(circle at 10% 20%, var(--color-doky-blue) 0%, transparent 40%),
+    radial-gradient(circle at 90% 10%, var(--color-doky-success) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, var(--color-doky-action-cyan) 0%, transparent 50%),
+    radial-gradient(circle at 90% 90%, var(--color-doky-blue) 0%, transparent 40%);
+  background-color: #f0f9ff;
+    background-size: 150% 150%;
+    background-attachment: fixed;
+}

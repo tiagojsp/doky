@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .font-heading {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .glass-card {
+    @apply bg-white border border-white/60 shadow-xl shadow-slate-200/50 rounded-[32px] backdrop-blur-xl;
+  }
+
+  .input-primary {
+    @apply block w-full px-5 py-3.5 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 font-bold outline-none transition-all duration-200 focus:bg-white focus:border-doky-action-cyan focus:ring-4 focus:ring-doky-action-cyan/10 placeholder:text-slate-400 placeholder:font-normal;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-doky-cyan to-doky-action-cyan text-white font-bold rounded-full px-8 py-4 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 uppercase tracking-wide text-xs;
+  }
+
+  .label-primary {
+    @apply block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1;
+  }
+
+  /* Glass Sidebar - Component Layer */
+  .glass-sidebar {
+    background: rgba(2, 30, 60, 0.65);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    @apply text-slate-600;
+    /* Neutral Professional Gray-Blue Background */
+    background-color: #f1f5f9;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(226, 232, 240, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(219, 234, 254, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(241, 245, 249, 1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(226, 232, 240, 1) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Montserrat', sans-serif;
+  }
+}
+
+/* Scrollbar utilities */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

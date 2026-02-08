@@ -57,17 +57,20 @@ export function useAppointments() {
         try {
             const created = await api.createAppointment(finalAppointment);
             if (!created) {
-                throw new Error("Failed to save appointment");
+                throw new Error("Não foi possível salvar o agendamento no momento.");
             }
-            // Replace optimistic with real one if ID changed (usually ID is passed in though?)
-            // If api.createAppointment returns the object with a new ID, update it.
+            // Replace optimistic with real one
             setAppointments(prev => prev.map(a => a.id === tempId ? created : a));
             return created;
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to add appointment", err);
+            // Revert optimistic update
             setAppointments(prev => prev.filter(a => a.id !== tempId));
-            setError(err instanceof Error ? err : new Error('Failed to add appointment'));
-            throw err;
+
+            // Provide more descriptive error to user
+            const errorMessage = err?.message || "Erro inesperado ao salvar marcação. Tente novamente.";
+            setError(new Error(errorMessage));
+            throw new Error(errorMessage);
         }
     };
 

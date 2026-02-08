@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { Staff } from '../../types';
 import { Search, Plus, Trash2, Edit, MoreVertical, Check, X, User, ChevronDown } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CollaboratorsListProps {
     onEdit: (staff: Staff) => void;
@@ -9,6 +10,7 @@ interface CollaboratorsListProps {
 }
 
 export const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ onEdit, onChange }) => {
+    const toast = useToast();
     const [staffMembers, setStaffMembers] = useState<Staff[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -29,6 +31,8 @@ export const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ onEdit, on
     };
 
     const handleTogglePermission = async (staffId: string, field: keyof NonNullable<Staff['permissions']>) => {
+        // Optimistic update
+        const originalMembers = [...staffMembers];
         const updatedMembers = staffMembers.map(staff => {
             if (staff.id === staffId && staff.permissions) {
                 return {
@@ -45,20 +49,41 @@ export const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ onEdit, on
 
         // Save change
         const member = updatedMembers.find(s => s.id === staffId);
-        if (member) await api.updateStaff(member);
+        if (member) {
+            const result = await api.updateStaff(member);
+            if (!result.success) {
+                setStaffMembers(originalMembers); // Rollback
+                toast.error(result.error || "Erro ao atualizar permissão.");
+            } else {
+                toast.success("Permissão atualizada com sucesso!");
+            }
+        }
     };
 
     const handleOrderChange = async (staffId: string, newOrder: string) => {
         const order = parseInt(newOrder);
-        if (isNaN(order)) return;
+        if (isNaN(order) || order < 1) {
+            toast.warning("A ordem deve ser um número válido maior que 0.");
+            return;
+        }
 
+        // Optimistic update
+        const originalMembers = [...staffMembers];
         const updatedMembers = staffMembers.map(staff =>
             staff.id === staffId ? { ...staff, order } : staff
         );
         setStaffMembers(updatedMembers);
-        // Debounce save in real app
+
         const member = updatedMembers.find(s => s.id === staffId);
-        if (member) await api.updateStaff(member);
+        if (member) {
+            const result = await api.updateStaff(member);
+            if (!result.success) {
+                setStaffMembers(originalMembers); // Rollback
+                toast.error(result.error || "Erro ao atualizar ordem.");
+            } else {
+                toast.success("Ordem atualizada com sucesso!");
+            }
+        }
     };
 
     const createNew = () => {
@@ -144,9 +169,17 @@ export const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ onEdit, on
                                             <select
                                                 value={staff.accessLevel || 'user'}
                                                 onChange={async (e) => {
+                                                    const originalMembers = [...staffMembers];
                                                     const updated = { ...staff, accessLevel: e.target.value as any };
                                                     setStaffMembers(prev => prev.map(s => s.id === staff.id ? updated : s));
-                                                    await api.updateStaff(updated);
+
+                                                    const result = await api.updateStaff(updated);
+                                                    if (!result.success) {
+                                                        setStaffMembers(originalMembers);
+                                                        toast.error(result.error || "Erro ao atualizar nível de acesso.");
+                                                    } else {
+                                                        toast.success("Nível de acesso atualizado!");
+                                                    }
                                                 }}
                                                 className="bg-transparent text-slate-600 font-medium text-xs w-full cursor-pointer outline-none hover:text-blue-600 appearance-none py-1"
                                             >
@@ -213,11 +246,17 @@ export const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ onEdit, on
                                             <button
                                                 onClick={async () => {
                                                     if (confirm('Tem a certeza que deseja eliminar este colaborador?')) {
-                                                        const success = await api.deleteStaff(staff.id);
-                                                        if (success) {
-                                                            setStaffMembers(prev => prev.filter(s => s.id !== staff.id));
+                                                        const originalMembers = [...staffMembers];
+                                                        setStaffMembers(prev => prev.filter(s => s.id !== staff.id));
+
+                                                        const result = await api.deleteStaff(staff.id);
+
+                                                        if (!result.success) {
+                                                            setStaffMembers(originalMembers); // Rollback
+                                                            toast.error(result.error || "Erro ao eliminar colaborador.");
                                                         } else {
-                                                            alert('Erro ao eliminar colaborador.');
+                                                            toast.success("Colaborador eliminado com sucesso!");
+                                                            if (onChange) onChange();
                                                         }
                                                     }
                                                 }}

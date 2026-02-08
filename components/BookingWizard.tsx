@@ -63,14 +63,22 @@ export const BookingWizard: React.FC<Props> = ({ onBackToAdmin, onNewBooking, se
   // Submit Logic
   const handleConfirmBooking = () => {
     if (selectedService && selectedDate && selectedTime) {
+      // If no staff selected (user chose "Any Professional"), pick first available staff
+      const finalStaffId = selectedStaff?.id || (staff.length > 0 ? staff[0].id : undefined);
+
+      if (!finalStaffId) {
+        alert('Erro: Nenhum profissional disponível');
+        return;
+      }
+
       const newAppt: Appointment = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),
         clientId: 'c_guest', // In real app create/find client
         clientName: clientInfo.name,
         clientPhone: clientInfo.phone,
         clientEmail: clientInfo.email,
         clientNif: clientInfo.nif,
-        staffId: selectedStaff?.id || 'any',
+        staffId: finalStaffId,
         serviceId: selectedService.id,
         date: selectedDate,
         startTime: selectedTime,
@@ -161,7 +169,7 @@ export const BookingWizard: React.FC<Props> = ({ onBackToAdmin, onNewBooking, se
         <div className="w-full flex-1 animate-fade-in-up">
           {step === 'SERVICE' && (
             <WizardStepService
-              services={services}
+              services={services.filter(s => s.isOnline)}
               settings={settings}
               onSelect={(s) => { setSelectedService(s); setStep('STAFF'); }}
             />

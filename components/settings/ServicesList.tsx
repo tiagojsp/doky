@@ -4,12 +4,14 @@ import { api } from '../../services/api';
 import { Service, KioskConfig } from '../../types';
 import { ServiceCollaboratorsModal } from './ServiceCollaboratorsModal';
 import { CategoryManager } from './CategoryManager';
+import { useToast } from '../../contexts/ToastContext';
 
 interface Props {
     onChange?: () => void;
 }
 
 export const ServicesList: React.FC<Props> = ({ onChange }) => {
+    const toast = useToast();
     const [services, setServices] = useState<Service[]>([]);
     const [kioskConfig, setKioskConfig] = useState<KioskConfig | null>(null);
     const [loading, setLoading] = useState(true);
@@ -36,12 +38,12 @@ export const ServicesList: React.FC<Props> = ({ onChange }) => {
                 api.fetchEstablishmentSettings()
             ]);
 
-            // Ensure data has the new structure if coming from old cache
+            // Ensure data has the correct boolean types
             const enriched = servicesData.map(s => ({
                 ...s,
-                ref: s.ref || Math.floor(Math.random() * 1000000).toString(),
+                isOnline: !!(s.isOnline ?? true),
+                ref: s.ref || '',
                 vat: s.vat ?? 23,
-                isOnline: s.isOnline ?? true,
                 category: s.category || 'Geral'
             }));
             setServices(enriched);
@@ -54,18 +56,65 @@ export const ServicesList: React.FC<Props> = ({ onChange }) => {
         }
     };
 
-    const handleUpdate = async (id: string, field: keyof Service, value: Service[keyof Service]) => {
+    const validateField = (field: keyof Service, value: any): { valid: boolean; error?: string } => {
+        switch (field) {
+            case 'name':
+                if (!value || value.trim() === '') {
+                    return { valid: false, error: 'O nome do serviço não pode estar vazio.' };
+                }
+                break;
+            case 'duration':
+                if (value <= 0) {
+                    return { valid: false, error: 'A duração deve ser maior que zero.' };
+                }
+                break;
+            case 'price':
+                if (value < 0) {
+                    return { valid: false, error: 'O preço não pode ser negativo.' };
+                }
+                break;
+            case 'vat':
+                if (value < 0 || value > 100) {
+                    return { valid: false, error: 'IVA deve estar entre 0% e 100%.' };
+                }
+                break;
+        }
+        return { valid: true };
+    };
+
+    const handleUpdate = async (id: string, field: keyof Service, value: any) => {
+        // Validate before updating
+        const validation = validateField(field, value);
+        if (!validation.valid) {
+            toast.warning(validation.error!);
+            return; // Don't proceed with update
+        }
+
         // Optimistic update
+        const originalServices = [...services];
         const updatedServices = services.map(s =>
             s.id === id ? { ...s, [field]: value } : s
         );
         setServices(updatedServices);
 
-        // Debounce actual save in real app, or simple save for now
         const serviceToUpdate = updatedServices.find(s => s.id === id);
         if (serviceToUpdate) {
-            await api.updateService(serviceToUpdate);
-            if (onChange) onChange();
+            try {
+                const result = await api.updateService(serviceToUpdate);
+
+                if (!result.success) {
+                    console.error('API failed to update service');
+                    setServices(originalServices); // Rollback
+                    toast.error(result.error || "Erro ao guardar alteração no servidor.");
+                } else {
+                    toast.success("Serviço atualizado com sucesso!");
+                    if (onChange) onChange();
+                }
+            } catch (err) {
+                console.error('Update service error:', err);
+                setServices(originalServices); // Rollback
+                toast.error("Erro inesperado ao atualizar serviço.");
+            }
         }
     };
 
@@ -74,11 +123,13 @@ export const ServicesList: React.FC<Props> = ({ onChange }) => {
             const originalServices = [...services];
             setServices(services.filter(s => s.id !== id));
 
-            const success = await api.deleteService(id);
-            if (!success) {
-                setServices(originalServices);
-                alert("Erro ao eliminar serviço");
+            const result = await api.deleteService(id);
+
+            if (!result.success) {
+                setServices(originalServices); // Rollback
+                toast.error(result.error || "Erro ao eliminar serviço");
             } else {
+                toast.success("Serviço eliminado com sucesso!");
                 if (onChange) onChange();
             }
         }
@@ -107,9 +158,19 @@ export const ServicesList: React.FC<Props> = ({ onChange }) => {
             collaborators: []
         };
 
+        // Optimistic add
         setServices([newService, ...services]);
-        await api.createService(newService);
-        if (onChange) onChange();
+
+        const result = await api.createService(newService);
+
+        if (!result.success) {
+            // Rollback
+            setServices(services);
+            toast.error(result.error || "Erro ao criar serviço");
+        } else {
+            toast.success("Serviço criado com sucesso!");
+            if (onChange) onChange();
+        }
     };
 
     const openCollaboratorsModal = (service: Service) => {
@@ -295,8 +356,13 @@ export const ServicesList: React.FC<Props> = ({ onChange }) => {
                                                 <td className="p-2 text-center">
                                                     <div className="flex justify-center">
                                                         <label className="relative inline-flex items-center cursor-pointer">
-                                                            <input type="checkbox" className="sr-only peer" checked={service.isOnline} onChange={(e) => handleUpdate(service.id, 'isOnline', e.target.checked)} />
-                                                            <div className="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[0px] after:left-[0px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-doky-success-green"></div>
+                                                            <input
+                                                                type="checkbox"
+                                                                className="sr-only peer"
+                                                                checked={!!service.isOnline}
+                                                                onChange={(e) => handleUpdate(service.id, 'isOnline', e.target.checked)}
+                                                            />
+                                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-doky-success-green"></div>
                                                         </label>
                                                     </div>
                                                 </td>

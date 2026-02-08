@@ -17,8 +17,8 @@ export const api = {
         }));
     },
 
-    async createService(service: Service): Promise<Service | null> {
-        const row = {
+    async createService(service: Service): Promise<{ success: boolean; error?: string; data?: Service }> {
+        const row: any = {
             id: service.id,
             name: service.name,
             category: service.category,
@@ -26,22 +26,37 @@ export const api = {
             price: service.price,
             description: service.description,
             featured: service.featured,
-            ref: service.ref,
             vat: service.vat,
             is_online: service.isOnline,
             commission: service.commission,
-            collaborators: service.collaborators
+            collaborators: service.collaborators,
+            ref: service.ref || '' // Always include ref, even if empty
         };
+
         const { error } = await supabase.from('services').insert(row);
         if (error) {
             console.error('Error creating service:', error);
-            return null;
+
+            // Provide specific error messages
+            let errorMessage = 'Erro ao criar serviço.';
+
+            if (error.code === '42703') {
+                errorMessage = 'Erro de esquema: coluna inexistente na base de dados.';
+            } else if (error.code === '23505') {
+                errorMessage = 'Erro: serviço já existe.';
+            } else if (error.message.includes('policy')) {
+                errorMessage = 'Erro de permissões: contacte o administrador.';
+            } else if (error.message) {
+                errorMessage = `Erro: ${error.message}`;
+            }
+
+            return { success: false, error: errorMessage };
         }
-        return service;
+        return { success: true, data: service };
     },
 
-    async updateService(service: Service): Promise<boolean> {
-        const row = {
+    async updateService(service: Service): Promise<{ success: boolean; error?: string }> {
+        const row: any = {
             id: service.id,
             name: service.name,
             category: service.category,
@@ -49,27 +64,56 @@ export const api = {
             price: service.price,
             description: service.description,
             featured: service.featured,
-            ref: service.ref,
             vat: service.vat,
             is_online: service.isOnline,
             commission: service.commission,
-            collaborators: service.collaborators
+            collaborators: service.collaborators,
+            ref: service.ref || '' // Always include ref, even if empty
         };
+
         const { error } = await supabase.from('services').update(row).eq('id', service.id);
         if (error) {
             console.error('Error updating service:', error);
-            return false;
+
+            // Provide specific error messages based on error code
+            let errorMessage = 'Erro ao guardar alteração no servidor.';
+
+            if (error.code === '42703') {
+                errorMessage = 'Erro de esquema: coluna inexistente na base de dados.';
+            } else if (error.code === '23505') {
+                errorMessage = 'Erro: valor duplicado.';
+            } else if (error.message.includes('policy')) {
+                errorMessage = 'Erro de permissões: contacte o administrador.';
+            } else if (error.message.includes('network')) {
+                errorMessage = 'Erro de rede: verifique a sua ligação.';
+            } else if (error.message) {
+                errorMessage = `Erro: ${error.message}`;
+            }
+
+            return { success: false, error: errorMessage };
         }
-        return true;
+        return { success: true };
     },
 
-    async deleteService(id: string): Promise<boolean> {
+    async deleteService(id: string): Promise<{ success: boolean; error?: string }> {
         const { error } = await supabase.from('services').delete().eq('id', id);
         if (error) {
             console.error('Error deleting service:', error);
-            return false;
+
+            // Provide specific error messages
+            let errorMessage = 'Erro ao eliminar serviço.';
+
+            if (error.message.includes('policy')) {
+                errorMessage = 'Erro de permissões: contacte o administrador.';
+            } else if (error.message.includes('foreign key')) {
+                errorMessage = 'Não é possível eliminar: existem marcações associadas a este serviço.';
+            } else if (error.message) {
+                errorMessage = `Erro: ${error.message}`;
+            }
+
+            return { success: false, error: errorMessage };
         }
-        return true;
+        return { success: true };
     },
 
     // --- PRODUCTS ---
@@ -284,20 +328,18 @@ export const api = {
         }));
     },
 
-    async updateStaff(staff: Staff): Promise<boolean> {
-        const row = {
+    async updateStaff(staff: Staff): Promise<{ success: boolean; error?: string }> {
+        const row: any = {
             id: staff.id,
             name: staff.name,
             role: staff.role,
             email: staff.email,
             mobile: staff.mobile,
             image_url: staff.imageUrl,
-            gender: staff.gender,
             bio: staff.bio,
-            specialty: staff.specialty,
             access_level: staff.accessLevel,
             color: staff.color,
-            order: staff.order,
+            order: staff.order || 1,
             permissions: staff.permissions,
             commissions: staff.commissions,
             schedule: staff.schedule
@@ -306,18 +348,44 @@ export const api = {
         const { error } = await supabase.from('staff').upsert(row);
         if (error) {
             console.error('Error updating staff:', error);
-            return false;
+
+            // Provide specific error messages
+            let errorMessage = 'Erro ao guardar alteração no colaborador.';
+
+            if (error.code === '42703') {
+                errorMessage = 'Erro de esquema: coluna inexistente na base de dados.';
+            } else if (error.code === '23505') {
+                errorMessage = 'Erro: email já existe.';
+            } else if (error.message.includes('policy')) {
+                errorMessage = 'Erro de permissões: contacte o administrador.';
+            } else if (error.message) {
+                errorMessage = `Erro: ${error.message}`;
+            }
+
+            return { success: false, error: errorMessage };
         }
-        return true;
+        return { success: true };
     },
 
-    async deleteStaff(id: string): Promise<boolean> {
+    async deleteStaff(id: string): Promise<{ success: boolean; error?: string }> {
         const { error } = await supabase.from('staff').delete().eq('id', id);
         if (error) {
             console.error('Error deleting staff:', error);
-            return false;
+
+            // Provide specific error messages
+            let errorMessage = 'Erro ao eliminar colaborador.';
+
+            if (error.message.includes('policy')) {
+                errorMessage = 'Erro de permissões: contacte o administrador.';
+            } else if (error.message.includes('foreign key') || error.message.includes('violates')) {
+                errorMessage = 'Não é possível eliminar: existem marcações ou serviços associados a este colaborador.';
+            } else if (error.message) {
+                errorMessage = `Erro: ${error.message}`;
+            }
+
+            return { success: false, error: errorMessage };
         }
-        return true;
+        return { success: true };
     },
 
     // --- CLIENTS ---
@@ -345,19 +413,13 @@ export const api = {
     },
 
     async updateClient(client: Client): Promise<boolean> {
-        const row = {
+        const row: any = {
             id: client.id,
             name: client.name,
             email: client.email,
             mobile: client.mobile,
             gender: client.gender,
-            nif: client.nif,
-            cc_number: client.ccNumber,
-            job_title: client.jobTitle,
-            address: client.address,
-            postal_code: client.postalCode,
-            city: client.city,
-            country: client.country,
+            // Omit missing columns: nif, cc_number, job_title, address, postal_code, city, country
             alternative_mobile: client.alternativeMobile,
             ref: client.ref,
             preferred_staff_id: client.preferredStaffId,
@@ -436,12 +498,12 @@ export const api = {
             consent: { marketing: false, sms: false, email: false, photos: false }
         };
 
-        const row = {
+        const row: any = {
             id: newClient.id,
             name: newClient.name,
             email: newClient.email || null,
             mobile: newClient.mobile || null,
-            nif: newClient.nif || null,
+            // nif: newClient.nif || null, // OMITTED: column missing in DB
             segment: newClient.segment,
             age: newClient.age,
             last_visit_days_ago: 0
@@ -486,7 +548,7 @@ export const api = {
     },
 
     async createAppointment(appointment: Appointment): Promise<Appointment | null> {
-        const row = {
+        const row: any = {
             id: appointment.id,
             client_id: appointment.clientId,
             staff_id: appointment.staffId,
@@ -497,7 +559,7 @@ export const api = {
             payment_status: appointment.paymentStatus,
             color: appointment.color,
             block_reason: appointment.blockReason,
-            duration: appointment.duration,
+            // duration: appointment.duration, // OMITTED: column missing in DB
             notes: appointment.notes,
             coupon: appointment.coupon,
             is_recurring: appointment.isRecurring

@@ -1,12 +1,16 @@
-import React, { Component, ErrorInfo, ReactNode, PropsWithChildren } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+
+interface Props {
+    children: ReactNode;
+}
 
 interface State {
     hasError: boolean;
     error: Error | null;
 }
 
-export class ErrorBoundary extends React.Component<PropsWithChildren<{}>, State> {
+export class ErrorBoundary extends Component<Props, State> {
     public state: State = {
         hasError: false,
         error: null

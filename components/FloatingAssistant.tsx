@@ -103,7 +103,7 @@ export const FloatingAssistant: React.FC<Props> = ({ appointments, clients, serv
                 appointmentsCount: appointments.length,
                 pendingCount: pendingCount,
                 clientsCount: clients.length,
-                revenueEstimate: appointments.filter(a => a.status === 'paid').length * 45 // Pure estimate
+                revenueEstimate: appointments.filter(a => a.paymentStatus === 'paid').length * 45 // Pure estimate
             },
             // Inject specific data found based on query
             relevantContext: {

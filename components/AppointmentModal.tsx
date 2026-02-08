@@ -37,7 +37,7 @@ export const AppointmentModal: React.FC<Props> = ({
     const [blockReason, setBlockReason] = useState('');
 
     // Status State
-    const [status, setStatus] = useState<'confirmed' | 'arrived' | 'paid' | 'no_show' | 'cancelled' | 'blocked'>('confirmed');
+    const [status, setStatus] = useState<'confirmed' | 'pending' | 'arrived' | 'paid' | 'no_show' | 'cancelled' | 'blocked'>('confirmed');
     const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid' | 'refunded' | undefined>(undefined);
 
     // Initialize

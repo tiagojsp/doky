@@ -5,9 +5,10 @@ import { Search, Plus, Trash2, Edit, MoreVertical, Check, X, User, ChevronDown }
 
 interface CollaboratorsListProps {
     onEdit: (staff: Staff) => void;
+    onChange?: () => void;
 }
 
-export const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ onEdit }) => {
+export const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ onEdit, onChange }) => {
     const [staffMembers, setStaffMembers] = useState<Staff[]>([]);
     const [loading, setLoading] = useState(true);
 

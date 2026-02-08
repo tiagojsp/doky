@@ -3,7 +3,11 @@ import { Plus, Save, Trash2, Edit2, ChevronDown, MoreVertical, Filter } from 'lu
 import { api } from '../../services/api';
 import { Voucher } from '../../types';
 
-export const VouchersList: React.FC = () => {
+interface VouchersListProps {
+    onChange?: () => void;
+}
+
+export const VouchersList: React.FC<VouchersListProps> = ({ onChange }) => {
     const [vouchers, setVouchers] = useState<Voucher[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);

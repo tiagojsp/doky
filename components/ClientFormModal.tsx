@@ -311,11 +311,11 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
                                                         </div>
                                                         <div className="text-right">
                                                             <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${appt.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                                appt.status === 'paid' ? 'bg-blue-100 text-blue-700' :
+                                                                appt.paymentStatus === 'paid' ? 'bg-blue-100 text-blue-700' :
                                                                     appt.status === 'cancelled' ? 'bg-red-100 text-red-700' :
                                                                         'bg-slate-100 text-slate-600'
                                                                 }`}>
-                                                                {appt.status === 'paid' ? 'Pago' : appt.status === 'confirmed' ? 'Confirmado' : appt.status === 'cancelled' ? 'Cancelado' : appt.status}
+                                                                {appt.paymentStatus === 'paid' ? 'Pago' : appt.status === 'confirmed' ? 'Confirmado' : appt.status === 'cancelled' ? 'Cancelado' : appt.status}
                                                             </span>
                                                         </div>
                                                     </div>

@@ -155,6 +155,10 @@ export interface Client {
 export interface Appointment {
   id: string;
   clientId: string;
+  clientName?: string; // For guest/kiosk
+  clientPhone?: string;
+  clientEmail?: string;
+  clientNif?: string;
   staffId: string;
   serviceId: string;
   startTime: string; // ISO string or simple time string for demo "09:00"
@@ -175,7 +179,65 @@ export enum ViewState {
   CAMPAIGNS = 'campanhas',
   REPORTS = 'relatorios',
   SETTINGS = 'definicoes',
-  BOOKING_WIZARD = 'booking_wizard'
+  BOOKING_WIZARD = 'booking_wizard',
+  PORTAL = 'portal',
+  KIOSK = 'kiosk'
+}
+
+export interface BusinessProfile {
+  type: string; // 'Clinic', 'Barber', 'Salon', 'Spa', 'Vet', 'Tattoo', 'Custom'
+  name: string;
+  logoUrl?: string;
+  primaryColor: string;
+  secondaryColor: string;
+  language: 'pt' | 'en' | 'es';
+  currency: 'EUR' | 'GBP' | 'USD';
+}
+
+export interface Terminology {
+  service_label: string;
+  service_subtitle: string;
+  professional_label: string;
+  professional_plural: string;
+  appointment_label: string;
+  booking_action: string;
+  client_label: string;
+  date_title: string;
+  date_subtitle: string;
+  data_title: string;
+  data_subtitle: string;
+  nif_field: string;
+  review_title?: string;
+  animal_name_field?: string;
+}
+
+export interface FormFieldConfig {
+  name: string;
+  label: string;
+  required: boolean;
+  active: boolean;
+  placeholder?: string;
+  type: 'text' | 'email' | 'tel' | 'number';
+}
+
+export interface FormConfig {
+  fields: FormFieldConfig[];
+}
+
+export interface KioskConfig {
+  screensaverImage?: string;
+  timeoutSeconds: number;
+  successMessage?: string;
+  showPromotions: boolean;
+  promotionText?: string;
+  showQrCode: boolean;
+  categories?: {
+    id: string;
+    name: string;
+    order: number;
+    icon?: string;
+    color?: string;
+  }[];
 }
 
 export interface EstablishmentSettings {
@@ -192,6 +254,7 @@ export interface EstablishmentSettings {
     mobile: string;
     email: string;
     website: string;
+    clientAppUrl?: string;
   };
   socials: {
     facebook: string;
@@ -221,6 +284,12 @@ export interface EstablishmentSettings {
     confirmationType: string; // 'simple', 'cancel', 'reschedule'
     resendSmsIfNeeded: boolean;
   };
-  alerts?: any;
-  aiConfig?: any;
+  alerts?: Record<string, unknown>;
+  aiConfig?: Record<string, unknown>;
+
+  // New Fields for Agnostic Kiosk
+  businessProfile?: BusinessProfile;
+  terminology?: Terminology;
+  formConfig?: FormConfig;
+  kioskConfig?: KioskConfig;
 }

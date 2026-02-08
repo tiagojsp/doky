@@ -48,7 +48,7 @@ export default function Home() {
             </div>
           </div>
           <Link
-            href="http://localhost:3000"
+            href={process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3000"}
             target="_blank"
             className="text-[10px] text-slate-300 hover:text-slate-500 uppercase tracking-widest transition-colors"
           >
